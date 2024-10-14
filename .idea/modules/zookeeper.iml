@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="zookeeper [file:/Users/mkapralov/IdeaProjects/Alfredis/]" external.linked.project.path="$MODULE_DIR$/../../zookeeper" external.root.project.path="$MODULE_DIR$/../.." external.system.id="SBT" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11">
+    <output url="file://$MODULE_DIR$/../../zookeeper/target/scala-3.4.2/classes" />
+    <output-test url="file://$MODULE_DIR$/../../zookeeper/target/scala-3.4.2/test-classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../zookeeper">
+      <sourceFolder url="file://$MODULE_DIR$/../../zookeeper/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../zookeeper/src/main/scala" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/../../zookeeper/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="sbt: scala-sdk-3.4.2" level="project" />
+    <orderEntry type="module" module-name="domain" />
+    <orderEntry type="library" name="sbt: ch.qos.logback:logback-classic:1.2.13:jar" level="project" />
+    <orderEntry type="library" name="sbt: ch.qos.logback:logback-core:1.2.13:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.github.pureconfig:pureconfig-core_3:0.17.7:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.code.findbugs:jsr305:3.0.2:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.errorprone:error_prone_annotations:2.18.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.guava:failureaccess:1.0.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.guava:guava:32.0.0-jre:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.j2objc:j2objc-annotations:2.8:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.loopfor.zookeeper:zookeeper-client_3:1.7.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.typesafe:config:1.4.3:jar" level="project" />
+    <orderEntry type="library" name="sbt: commons-io:commons-io:2.11.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: dev.zio:izumi-reflect-thirdparty-boopickle-shaded_3:2.3.9:jar" level="project" />
+    <orderEntry type="library" name="sbt: dev.zio:izumi-reflect_3:2.3.9:jar" level="project" />
+    <orderEntry type="library" name="sbt: dev.zio:zio-internal-macros_3:2.1.9:jar" level="project" />
+    <orderEntry type="library" name="sbt: dev.zio:zio-stacktracer_3:2.1.9:jar" level="project" />
+    <orderEntry type="library" name="sbt: dev.zio:zio-streams_3:2.1.9:jar" level="project" />
+    <orderEntry type="library" name="sbt: dev.zio:zio_3:2.1.9:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-buffer:4.1.105.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-codec:4.1.105.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-common:4.1.105.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-handler:4.1.105.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-resolver:4.1.105.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-tcnative-boringssl-static:2.0.61.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-tcnative-boringssl-static:2.0.61.Final:linux-aarch_64:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-tcnative-boringssl-static:2.0.61.Final:linux-x86_64:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-tcnative-boringssl-static:2.0.61.Final:osx-aarch_64:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-tcnative-boringssl-static:2.0.61.Final:osx-x86_64:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-tcnative-boringssl-static:2.0.61.Final:windows-x86_64:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-tcnative-classes:2.0.61.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-transport-classes-epoll:4.1.105.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-transport-native-epoll:4.1.105.Final:linux-x86_64:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-transport-native-unix-common:4.1.105.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-transport:4.1.105.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.apache.curator:curator-client:5.7.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.apache.curator:curator-framework:5.7.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.apache.curator:curator-x-async:5.7.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.apache.yetus:audience-annotations:0.12.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.apache.zookeeper:zookeeper-jute:3.9.2:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.apache.zookeeper:zookeeper:3.9.2:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.checkerframework:checker-qual:3.33.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.13.12:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala3-library_3:3.4.2:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.slf4j:slf4j-api:1.7.32:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.typelevel:cats-core_3:2.12.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.typelevel:cats-kernel_3:2.12.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.xerial.snappy:snappy-java:1.1.7:jar" level="project" />
+    <orderEntry type="module-library">
+      <library name="sbt: unmanaged-sources-and-docs">
+        <CLASSES />
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/io/netty/netty-transport-native-epoll/4.1.105.Final/netty-transport-native-epoll-4.1.105.Final-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+  </component>
+</module>
