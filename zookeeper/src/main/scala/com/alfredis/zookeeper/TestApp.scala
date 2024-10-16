@@ -3,7 +3,7 @@ package com.alfredis.zookeeper
 import com.alfredis.error.DomainError
 import com.alfredis.zookeeper.config.{AppConfig, ZookeeperClusterState, ZookeeperConfig}
 import com.alfredis.zookeeper.model.WatcherEvent
-import com.alfredis.zookeeper.service.{StartUpService, StartUpServiceImpl, WatcherEventProcessor}
+import com.alfredis.zookeeper.service.*
 import zio.{Hub, Ref, Scope, ULayer, ZIO, ZIOAppArgs, ZIOAppDefault, ZLayer}
 
 object TestApp extends ZIOAppDefault {
@@ -11,10 +11,14 @@ object TestApp extends ZIOAppDefault {
     Hub.unbounded[WatcherEvent]()
   }
 
-  private val mainFlow: ZIO[StartUpService, DomainError, Unit] = for {
-    service <- ZIO.service[StartUpService]
-    _       <- service.startup()
-    _       <- ZIO.never
+  private val mainFlow: ZIO[StartUpService & LeaderElectionService & WorkerRegistrationService, DomainError, Unit] = for {
+    service                   <- ZIO.service[StartUpService]
+    leaderElectionService     <- ZIO.service[LeaderElectionService]
+    workerRegistrationService <- ZIO.service[WorkerRegistrationService]
+    _                         <- leaderElectionService.startElection()
+    _                         <- workerRegistrationService.registerWorkerNode()
+//    _       <- service.startup()
+    _ <- ZIO.never
   } yield ()
 
   private val eventProcessor: ZIO[WatcherEventProcessor, DomainError, Unit] = for {
@@ -32,5 +36,7 @@ object TestApp extends ZIOAppDefault {
         AppConfig.live,
         StartUpServiceImpl.live,
         WatcherEventProcessor.live,
+        LeaderElectionServiceImpl.live,
+        WorkerRegistrationServiceImpl.live,
       )
 }

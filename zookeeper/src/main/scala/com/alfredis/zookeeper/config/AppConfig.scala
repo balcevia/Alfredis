@@ -5,7 +5,7 @@ import pureconfig.ConfigReader
 import pureconfig.generic.derivation.default.*
 import zio.{ULayer, ZLayer}
 
-case class AppConfig(leadersPath: String)
+case class AppConfig(leadersPath: String, electionPath: String, workersPath: String)
 
 object AppConfig {
   given ConfigReader[AppConfig] = ConfigReader.derived

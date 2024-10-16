@@ -33,7 +33,7 @@ case class ZookeeperServiceImpl(asyncClient: AsyncCuratorFramework)  {
         .collectAll {
           children.map { child =>
             getDataAsString(s"$path/$child")
-              .map(data => ZookeeperNode(s"$path/$child", data))
+              .map(data => ZookeeperNode(s"$path/$child", data, 0)) //fixme version if needed
               .map(node => node.path -> node)
           }
         }
