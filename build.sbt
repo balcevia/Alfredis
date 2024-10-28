@@ -19,6 +19,7 @@ lazy val commonSettings = Seq(
     "-Wvalue-discard",
     "-Xfatal-warnings",
     "-Yretain-trees",
+    "-Ykind-projector:underscores",
   ),
 )
 
@@ -28,12 +29,17 @@ lazy val domain = project
     libraryDependencies ++= Dependencies.domain,
   )
 
-lazy val zookeeper = project
+lazy val `zookeeper-core` = project
   .settings(commonSettings *)
   .dependsOn(domain)
   .settings(
-    libraryDependencies ++= Dependencies.zookeeper
+    libraryDependencies ++= Dependencies.zookeeper,
   )
+
+lazy val `cache-server` = project
+  .settings(commonSettings *)
+  .dependsOn(domain)
+  .dependsOn(`zookeeper-core`)
 
 lazy val `app` = (project in file("."))
   .aggregate(

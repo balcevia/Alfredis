@@ -3,11 +3,12 @@ package com.alfredis.cache
 import com.alfredis.list.{DoublyLinkedList, Node}
 
 import java.util
+import scala.jdk.CollectionConverters.*
 
 case class LRUCache[K, V](private val capacity: Int) extends Cache[K, V] {
 
   private val cacheMap: util.Map[K, Node[CacheRecord[K, V]]] = new util.HashMap[K, Node[CacheRecord[K, V]]]()
-  private val queue: DoublyLinkedList[CacheRecord[K, V]] = DoublyLinkedList()
+  private val queue: DoublyLinkedList[CacheRecord[K, V]]     = DoublyLinkedList()
 
   override def put(key: K, value: V): V = {
     if (cacheMap.containsKey(key)) {
@@ -42,6 +43,8 @@ case class LRUCache[K, V](private val capacity: Int) extends Cache[K, V] {
       Some(node.record.value)
     }
   }
+
+  override def getAll: List[CacheRecord[K, V]] = cacheMap.values().asScala.map(_.record).toList
 }
 
 object LRUCache {

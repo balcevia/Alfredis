@@ -1,0 +1,4 @@
+[warn] /Users/mkapralov/IdeaProjects/Alfredis/project/Dependencies.scala:16:17: Reference to uninitialized value http
+[warn]   ) ++ circe ++ http
+[warn]                 ^
+[warn] one warning found

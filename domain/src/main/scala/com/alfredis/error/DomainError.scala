@@ -21,3 +21,11 @@ case class ZookeeperNodeCreationError(override val message: String) extends Doma
 case class ZNodeNotFound(path: String) extends DomainError {
   override val message: String = s"ZNode with path $path doesn't exist"
 }
+
+case object UnauthorizedCacheCreateEntryRequest extends DomainError {
+  override val message: String = "Unauthorized cache create entry request"
+}
+
+case class HttpClientError(override val message: String) extends DomainError
+
+case class HttpClientDecodingError(override val message: String) extends DomainError
