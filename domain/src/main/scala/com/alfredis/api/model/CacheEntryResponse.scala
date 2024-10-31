@@ -1,4 +1,4 @@
-package com.alfredis.cache.server.http.model
+package com.alfredis.api.model
 
 import io.circe.Codec
 import io.circe.generic.semiauto.deriveCodec

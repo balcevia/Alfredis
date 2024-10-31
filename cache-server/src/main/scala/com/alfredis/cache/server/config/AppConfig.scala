@@ -6,12 +6,10 @@ import pureconfig.generic.derivation.default.*
 import zio.{ULayer, ZLayer}
 
 case class AppConfig(
-                      leadersPath: String,
-                      electionPath: String,
-                      workersPath: String,
-                      server: HttpServerConfig,
-                      cache: CacheConfig,
-                    )
+    groupName: String,
+    server: HttpServerConfig,
+    cache: CacheConfig,
+)
 
 object AppConfig {
   given ConfigReader[AppConfig] = ConfigReader.derived

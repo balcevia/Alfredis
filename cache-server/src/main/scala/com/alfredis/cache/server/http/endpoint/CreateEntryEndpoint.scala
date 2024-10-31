@@ -1,8 +1,8 @@
 package com.alfredis.cache.server.http.endpoint
 
+import com.alfredis.api.model.CreateEntryRequest
 import com.alfredis.cache.server.http.TapirRoute
 import com.alfredis.cache.server.http.error.{CacheServerError, ErrorHandler}
-import com.alfredis.cache.server.http.model.CreateEntryRequest
 import com.alfredis.cache.server.http.service.CacheService
 import com.alfredis.error.UnauthorizedCacheCreateEntryRequest
 import com.alfredis.cache.server.http.CacheRoutes.Env

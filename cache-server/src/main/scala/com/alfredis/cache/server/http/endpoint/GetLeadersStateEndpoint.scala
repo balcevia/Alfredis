@@ -3,9 +3,9 @@ package com.alfredis.cache.server.http.endpoint
 import com.alfredis.error.UnauthorizedCacheCreateEntryRequest
 import com.alfredis.cache.server.http.CacheRoutes.Env
 import GetEntryEndpoint.publicEndpoint
+import com.alfredis.api.model.CacheEntryResponse
 import com.alfredis.cache.server.http.TapirRoute
 import com.alfredis.cache.server.http.error.{CacheServerError, ErrorHandler}
-import com.alfredis.cache.server.http.model.CacheEntryResponse
 import com.alfredis.cache.server.http.service.CacheService
 import com.alfredis.zookeepercore.config.ZookeeperClusterState
 import sttp.model.StatusCode

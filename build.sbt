@@ -41,6 +41,11 @@ lazy val `cache-server` = project
   .dependsOn(domain)
   .dependsOn(`zookeeper-core`)
 
+lazy val `cache-client` = project
+  .settings(commonSettings *)
+  .dependsOn(domain)
+  .dependsOn(`zookeeper-core`)
+
 lazy val `app` = (project in file("."))
   .aggregate(
     domain,

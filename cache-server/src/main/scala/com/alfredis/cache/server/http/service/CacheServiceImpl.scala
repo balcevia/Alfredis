@@ -1,7 +1,7 @@
 package com.alfredis.cache.server.http.service
 
+import com.alfredis.api.model.{CacheEntryRequest, CacheEntryResponse, CreateEntryRequest}
 import com.alfredis.cache.server.http.URLUtils
-import com.alfredis.cache.server.http.model.{CacheEntryRequest, CacheEntryResponse, CreateEntryRequest}
 import com.alfredis.cache.{Cache, CacheRecord}
 import com.alfredis.httpclient.HttpClient
 import com.alfredis.zookeepercore.config.ZookeeperClusterState

@@ -31,7 +31,7 @@ case class ApacheZookeeperServiceImpl(keeper: ZooKeeper, events: Hub[WatcherEven
     keeper.getData(path, null, dataCallback, null)
   }
 
-  override def getChildren(path: String, watcher: Boolean, eventType: WatcherEventType): IO[DomainError, List[String]] = ZIO.async {
+  override def getChildren(path: String, eventType: Option[WatcherEventType]): IO[DomainError, List[String]] = ZIO.async {
     callback =>
       val dataCallback = new AsyncCallback.ChildrenCallback:
         override def processResult(rc: Int, path: String, ctx: Any, children: java.util.List[String]): Unit = {
@@ -41,12 +41,12 @@ case class ApacheZookeeperServiceImpl(keeper: ZooKeeper, events: Hub[WatcherEven
           }
         }
 
-      val childrenWatcher: Option[Watcher] = Option.when(watcher) { (event: WatchedEvent) =>
-        {
+      val childrenWatcher: Option[Watcher] = eventType.map { e =>
+        (event: WatchedEvent) => {
           event.getType match {
             case EventType.NodeChildrenChanged =>
               Unsafe.unsafe(implicit unsafe =>
-                zio.Runtime.default.unsafe.run(events.offer(WatcherEvent(eventType, event.getPath))).getOrThrow(),
+                zio.Runtime.default.unsafe.run(events.offer(WatcherEvent(e, event.getPath))).getOrThrow(),
               )
               ()
             case _ => ()
@@ -82,8 +82,8 @@ case class ApacheZookeeperServiceImpl(keeper: ZooKeeper, events: Hub[WatcherEven
     keeper.create(path, data.map(_.getBytes).orNull, ZooDefs.Ids.OPEN_ACL_UNSAFE, createMode, dataCallback, null)
   }
 
-  override def getChildrenWithData(path: String, eventType: WatcherEventType): IO[DomainError, Map[String, ZookeeperNode]] = {
-    getChildren(path, true, eventType).flatMap { children =>
+  override def getChildrenWithData(path: String, eventType: Option[WatcherEventType]): IO[DomainError, Map[String, ZookeeperNode]] = {
+    getChildren(path, eventType).flatMap { children =>
       ZIO
         .collectAll {
           children.map(child => getData(s"$path/$child").map(node => child -> node))

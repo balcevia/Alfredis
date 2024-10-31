@@ -10,7 +10,7 @@ import zio.stream.ZStream
 import zio.{Hub, IO, Ref, ZIO, ZLayer}
 
 case class WatcherEventProcessor(
-    appConfig: AppConfig,
+    zookeeperConfig: ZookeeperConfig,
     eventHub: Hub[WatcherEvent],
     clusterState: Ref[ZookeeperClusterState],
     zookeeperService: ApacheZookeeperService,
@@ -34,7 +34,7 @@ case class WatcherEventProcessor(
 
   private def processWorkersChangeEvent(): ZIO[Any, DomainError, Unit] =
     zookeeperService
-      .getChildrenWithData(appConfig.workersPath, WatcherEventType.WorkersChange)
+      .getChildrenWithData(zookeeperConfig.workersPath, Some(WatcherEventType.WorkersChange))
       .flatMap(workers => clusterState.update(state => state.copy(workers = workers.values.toList)))
       .tap(_ => clusterState.get.flatMap(state => ZIO.logInfo(s"Updated cluster state: $state")))
 
@@ -50,11 +50,10 @@ object WatcherEventProcessor {
   ] = ZLayer.fromZIO {
     for {
       config                <- ZIO.service[ZookeeperConfig]
-      appConfig             <- ZIO.service[AppConfig]
       clusterState          <- ZIO.service[Ref[ZookeeperClusterState]]
       eventHub              <- ZIO.service[Hub[WatcherEvent]]
       keeper                <- ZKConnection.connect(config.host, config.port)
       leaderElectionService <- ZIO.service[LeaderElectionService]
-    } yield WatcherEventProcessor(appConfig, eventHub, clusterState, ApacheZookeeperServiceImpl(keeper, eventHub), leaderElectionService)
+    } yield WatcherEventProcessor(config, eventHub, clusterState, ApacheZookeeperServiceImpl(keeper, eventHub), leaderElectionService)
   }
 }

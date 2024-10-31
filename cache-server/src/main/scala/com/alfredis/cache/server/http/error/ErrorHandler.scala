@@ -11,6 +11,7 @@ trait ErrorHandler {
     case ZNodeNotFound(message)                      => ServerError(message)
     case error @ UnauthorizedCacheCreateEntryRequest => AuthorizationError(error.message)
     case HttpClientError(message)                    => BadRequest(message)
+    case HttpClientSendingRequestError(message)      => BadRequest(message)
     case HttpClientDecodingError(message)            => UnprocessableEntity(message)
   }
 }

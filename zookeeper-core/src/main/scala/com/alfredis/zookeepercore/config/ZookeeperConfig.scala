@@ -5,7 +5,7 @@ import pureconfig.ConfigReader
 import pureconfig.generic.derivation.default.*
 import zio.{ULayer, ZLayer}
 
-case class ZookeeperConfig(host: String, port: Int)
+case class ZookeeperConfig(host: String, port: Int, leadersPath: String, electionPath: String, workersPath: String)
 
 object ZookeeperConfig {
   given ConfigReader[ZookeeperConfig] = ConfigReader.derived

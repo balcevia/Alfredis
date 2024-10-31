@@ -1,7 +1,7 @@
 package com.alfredis.cache.server.http.service
 
+import com.alfredis.api.model.CacheEntryRequest
 import com.alfredis.cache.CacheRecord
-import com.alfredis.cache.server.http.model.CacheEntryRequest
 import zio.UIO
 
 trait CacheService {

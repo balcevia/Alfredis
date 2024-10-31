@@ -1,7 +1,7 @@
 package com.alfredis.httpclient
 
 import cats.syntax.either.*
-import com.alfredis.error.{DomainError, HttpClientDecodingError, HttpClientError}
+import com.alfredis.error.{DomainError, HttpClientDecodingError, HttpClientError, HttpClientSendingRequestError}
 import io.circe.syntax.*
 import io.circe.{Codec, Decoder, Printer, parser}
 import sttp.client3.*
@@ -65,7 +65,7 @@ case class HttpClient(backend: SttpBackend[Task, ZioWebSocketsStreams]) {
           case statusCode => HttpClientError(s"Request to ${request.uri} failed, unexpected status code $statusCode").asLeft
         }
       }
-      .mapError(error => HttpClientError(error.getMessage))
+      .mapError(error => HttpClientSendingRequestError(error.getMessage))
       .absolve
   }
 

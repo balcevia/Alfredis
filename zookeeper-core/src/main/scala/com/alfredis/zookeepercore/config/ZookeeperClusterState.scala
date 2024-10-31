@@ -23,4 +23,13 @@ object ZookeeperClusterState {
   }
 }
 
-case class ZookeeperNode(path: String, data: String, version: Int)
+case class ZookeeperNode(path: String, data: String, version: Int) {
+  val decodedData: (String, String) = {
+    val splited = data.split("<>")
+    splited(0) -> splited(1)
+  }
+}
+
+object ZookeeperNode {
+  def encodeData(groupName: String, host: String) = s"$groupName<>$host"
+}

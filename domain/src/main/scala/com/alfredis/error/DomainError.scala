@@ -28,4 +28,6 @@ case object UnauthorizedCacheCreateEntryRequest extends DomainError {
 
 case class HttpClientError(override val message: String) extends DomainError
 
+case class HttpClientSendingRequestError(override val message: String) extends DomainError
+
 case class HttpClientDecodingError(override val message: String) extends DomainError
