@@ -10,8 +10,6 @@ import com.alfredis.zookeepercore.service.{ApacheZookeeperService, ApacheZookeep
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio.{Hub, IO, Ref, UIO, ZIO}
 
-import scala.reflect.ClassTag
-
 case class CacheClient private (
     httpClient: HttpClient,
     zookeeperService: ApacheZookeeperService,

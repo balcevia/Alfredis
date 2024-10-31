@@ -8,7 +8,7 @@ class LRUCacheSpec extends AnyFlatSpec with Matchers with OptionValues {
   behavior of "LRUCache"
 
   it should "add elements to cache and return them" in {
-    val cache: Cache[String, Int] = LRUCache[String, Int](5)
+    val cache: Cache[String, Int] = LRUCache[String, Int](5, 100)
 
     for (i <- 1 to 5)
       cache.put(i.toString, i)
@@ -18,7 +18,7 @@ class LRUCacheSpec extends AnyFlatSpec with Matchers with OptionValues {
   }
 
   it should "add elements and remove least recent used if number of records exceeds capacity" in {
-    val cache: Cache[String, Int] = LRUCache[String, Int](5)
+    val cache: Cache[String, Int] = LRUCache[String, Int](5, 100)
 
     for (i <- 1 to 5)
       cache.put(i.toString, i)

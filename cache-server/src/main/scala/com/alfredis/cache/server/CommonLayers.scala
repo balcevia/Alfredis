@@ -12,9 +12,7 @@ object CommonLayers {
 
   val cacheLayer: ZLayer[AppConfig, Nothing, Ref[Cache[String, Array[Byte]]]] = ZLayer.fromZIO {
     ZIO.service[AppConfig].flatMap { config =>
-      val cache: ZIO[Any, Nothing, Ref[Cache[String, Array[Byte]]]] = Ref.make(new LRUCache[String, Array[Byte]](config.cache.capacity))
-
-      cache
+      Ref.make[Cache[String, Array[Byte]]](new LRUCache[String, Array[Byte]](config.cache.capacity, config.cache.ttl))
     }
   }
 }
