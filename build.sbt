@@ -40,6 +40,8 @@ lazy val `cache-server` = project
   .settings(commonSettings *)
   .dependsOn(domain)
   .dependsOn(`zookeeper-core`)
+  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(DockerPlugin)
 
 lazy val `cache-client` = project
   .settings(commonSettings *)

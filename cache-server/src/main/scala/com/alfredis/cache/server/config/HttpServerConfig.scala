@@ -3,8 +3,8 @@ package com.alfredis.cache.server.config
 import pureconfig.ConfigReader
 import pureconfig.generic.derivation.default.*
 
-case class HttpServerConfig(host: String, port: Int) {
-  val hostName: String = s"$host:$port"
+case class HttpServerConfig(host: String, port: Int, int: String) {
+  val hostName: String = s"$int:$port"
 }
 
 object HttpServerConfig:

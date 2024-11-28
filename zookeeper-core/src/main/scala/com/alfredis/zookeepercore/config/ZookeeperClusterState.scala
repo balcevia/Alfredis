@@ -24,7 +24,7 @@ object ZookeeperClusterState {
 }
 
 case class ZookeeperNode(path: String, data: String, version: Int) {
-  val decodedData: (String, String) = {
+  def decodedData: (String, String) = {
     val splited = data.split("<>")
     splited(0) -> splited(1)
   }

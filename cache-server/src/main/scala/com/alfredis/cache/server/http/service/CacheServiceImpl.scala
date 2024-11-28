@@ -24,7 +24,7 @@ case class CacheServiceImpl(cache: Ref[Cache[String, Array[Byte]]], clusterState
       state <- clusterState.get
       requestBody    = CreateEntryRequest(state.currentLeader.map(_.path), entries)
       serialisedBody = requestBody.asJson.printWith(Printer.noSpaces)
-      requests       = state.workers.map(w => URLUtils.createEntryUrl(w.data)).map(uri => httpClient.postRequest(uri, serialisedBody))
+      requests       = state.workers.map(w => URLUtils.createEntryUrl(w.decodedData._2)).map(uri => httpClient.postRequest(uri, serialisedBody))
       _ <- ZIO.collectAllPar(requests.map(httpClient.callApiUnit))
     } yield ()
 
@@ -42,7 +42,7 @@ case class CacheServiceImpl(cache: Ref[Cache[String, Array[Byte]]], clusterState
     val result = clusterState.get.flatMap { state =>
       if (!state.isLeader && state.currentLeader.isDefined) {
         val request = httpClient
-          .getRequest(URLUtils.retrieveLeadersStateUrl(state.currentLeader.get.data))
+          .getRequest(URLUtils.retrieveLeadersStateUrl(state.currentLeader.get.decodedData._2))
           .header(Header("From", state.workerNode.get.path))
 
         for {
