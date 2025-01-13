@@ -4,7 +4,8 @@ import pureconfig.ConfigReader
 import pureconfig.generic.derivation.default.*
 
 case class HttpServerConfig(host: String, port: Int, int: String) {
-  val hostName: String = s"$int:$port"
+  val internalHostName: String = s"$int:$port"
+  val externalHostName: String = s"$host:$port"
 }
 
 object HttpServerConfig:

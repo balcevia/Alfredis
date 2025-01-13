@@ -16,7 +16,7 @@ case class WorkerRegistrationServiceImpl(
     config: ZookeeperConfig,
 ) extends WorkerRegistrationService {
   override def registerWorkerNode(): IO[DomainError, Unit] = {
-    val data = ZookeeperNode.encodeData(appConfig.groupName, appConfig.server.hostName)
+    val data = ZookeeperNode.encodeData(appConfig.groupName, appConfig.server.internalHostName)
 
     clusterState.get.flatMap {
       case state if state.isLeader => ZIO.unit

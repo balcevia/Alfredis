@@ -7,8 +7,8 @@ import com.alfredis.zookeepercore.ZKConnection
 import com.alfredis.zookeepercore.config.ZookeeperConfig
 import com.alfredis.zookeepercore.model.WatcherEvent
 import com.alfredis.zookeepercore.service.{ApacheZookeeperService, ApacheZookeeperServiceImpl}
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import zio.{Hub, IO, Ref, UIO, ZIO}
+import sttp.client3.httpclient.zio.HttpClientZioBackend
+import zio.{Hub, IO, Ref, UIO, ZIO, ZLayer}
 
 case class CacheClient private (
     httpClient: HttpClient,
@@ -87,8 +87,15 @@ object CacheClient {
       leaderNodes <- zookeeperService.getChildrenWithData(config.leadersPath, None)
       leaders = leaderNodes.values.map(_.decodedData).toMap
       leadersRef <- Ref.make(leaders)
-      backend    <- AsyncHttpClientZioBackend().mapError(ex => HttpClientError(ex.getMessage))
+      backend    <- HttpClientZioBackend().mapError(ex => HttpClientError(ex.getMessage))
       httpClient = HttpClient(backend)
     } yield CacheClient(httpClient, zookeeperService, leadersRef, config, ConsistentHashing(leaders.keys.toList))
+  }
+  
+  val live: ZLayer[ZookeeperConfig, DomainError, CacheClient] = ZLayer.fromZIO {
+    for {
+      config <- ZIO.service[ZookeeperConfig]
+      client <- create(config)
+    } yield client
   }
 }

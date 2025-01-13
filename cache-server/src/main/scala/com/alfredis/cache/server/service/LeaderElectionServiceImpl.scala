@@ -17,7 +17,7 @@ case class LeaderElectionServiceImpl(
     appConfig: AppConfig,
 ) extends LeaderElectionService {
   override def startElection(): IO[DomainError, Unit] = {
-    val data = ZookeeperNode.encodeData(appConfig.groupName, appConfig.server.hostName)
+    val data = ZookeeperNode.encodeData(appConfig.groupName, appConfig.server.externalHostName)
     for {
       _           <- ZIO.logInfo("Joining elections....")
       _           <- createNode(zookeeperConfig.electionPath, CreateMode.PERSISTENT)
@@ -37,7 +37,7 @@ case class LeaderElectionServiceImpl(
       if (isLeader)
         service.create(
           s"${zookeeperConfig.leadersPath}/leader",
-          Some(ZookeeperNode.encodeData(appConfig.groupName, appConfig.server.hostName)),
+          Some(ZookeeperNode.encodeData(appConfig.groupName, appConfig.server.externalHostName)),
           CreateMode.EPHEMERAL_SEQUENTIAL,
         )
       else ZIO.unit
