@@ -58,14 +58,3 @@ object AlfredisLatencyTest extends ZIOAppDefault {
     )
   }
 }
-
-object X extends App {
-  val circular = Iterator.continually(List(1, 2, 3, 4)).flatten
-  println(circular.next)
-  println(circular.next)
-  println(circular.next)
-  println(circular.next)
-  println(circular.next)
-  println(circular.next)
-  println(circular.next)
-}
