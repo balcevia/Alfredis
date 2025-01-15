@@ -19,7 +19,7 @@ case class LeaderElectionServiceImpl(
   override def startElection(): IO[DomainError, Unit] = {
     val data = ZookeeperNode.encodeData(appConfig.groupName, appConfig.server.externalHostName)
     for {
-      _           <- ZIO.logInfo("Joining elections....")
+      _           <- ZIO.logTrace("Joining elections....")
       _           <- createNode(zookeeperConfig.electionPath, CreateMode.PERSISTENT)
       createdNode <- service.create(s"${zookeeperConfig.electionPath}/leader", Some(data), CreateMode.EPHEMERAL_SEQUENTIAL)
       _           <- clusterState.update(state => state.copy(electionNode = Some(createdNode)))
@@ -28,7 +28,7 @@ case class LeaderElectionServiceImpl(
   }
 
   override def electNewLeader(): IO[DomainError, Unit] = for {
-    _             <- ZIO.logInfo("Electing new leader...")
+    _             <- ZIO.logTrace("Electing new leader...")
     electionState <- service.getChildren(zookeeperConfig.electionPath, Some(WatcherEventType.ElectionStateChange))
     state         <- clusterState.get
     isLeader = isCurrentNodeLeader(state.electionNode.map(_.path), electionState)
@@ -63,7 +63,7 @@ case class LeaderElectionServiceImpl(
     workerNode match {
       case Some(node) if isLeader =>
         for {
-          _ <- ZIO.logInfo(s"Current node was elected as a new leader, removing worker node at path '${node.path}'....")
+          _ <- ZIO.logTrace(s"Current node was elected as a new leader, removing worker node at path '${node.path}'....")
           _ <- service.remove(node.path, node.version)
           _ <- clusterState.update(state => state.copy(workerNode = None))
         } yield ()
@@ -74,11 +74,11 @@ case class LeaderElectionServiceImpl(
   private def retrieveWorkersListIfNeeded(isLeader: Boolean) = {
     if (isLeader) {
       for {
-        _                 <- ZIO.logInfo("Retrieving workers list...")
+        _                 <- ZIO.logTrace("Retrieving workers list...")
         workersNodeExists <- service.exists(zookeeperConfig.workersPath)
         _                 <- if (!workersNodeExists) service.create(zookeeperConfig.workersPath, None, CreateMode.PERSISTENT) else ZIO.unit
         children          <- service.getChildrenWithData(zookeeperConfig.workersPath, Some(WatcherEventType.WorkersChange))
-        _                 <- ZIO.logInfo(s"Retrieved workers: $children")
+        _                 <- ZIO.logTrace(s"Retrieved workers: $children")
         _                 <- clusterState.update(state => state.copy(workers = children.values.toList))
       } yield ()
     } else ZIO.succeed(())

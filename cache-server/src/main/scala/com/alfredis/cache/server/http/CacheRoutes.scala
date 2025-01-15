@@ -1,6 +1,6 @@
 package com.alfredis.cache.server.http
 
-import com.alfredis.cache.server.http.endpoint.{CreateEntryEndpoint, GetEntryEndpoint, GetLeadersStateEndpoint, HealthCheckEndpoint}
+import com.alfredis.cache.server.http.endpoint.HealthCheckEndpoint
 import com.alfredis.cache.server.http.service.CacheService
 import com.alfredis.zookeepercore.config.ZookeeperClusterState
 import org.http4s.HttpRoutes
@@ -15,9 +15,9 @@ object CacheRoutes {
     ZHttp4sServerInterpreter()
       .from(
         List(
-          CreateEntryEndpoint.serverEndpoint,
-          GetEntryEndpoint.serverEndpoint,
-          GetLeadersStateEndpoint.serverEndpoint,
+//          CreateEntryEndpoint.serverEndpoint,
+//          GetEntryEndpoint.serverEndpoint,
+//          GetLeadersStateEndpoint.serverEndpoint,
           HealthCheckEndpoint.serverEndpoint,
         ).map(_.widen[Env]),
       )

@@ -14,7 +14,7 @@ object CacheHttpServer {
       ZIO.executor.flatMap(executor =>
         BlazeServerBuilder[RIO[Env, *]]
           .withExecutionContext(executor.asExecutionContext)
-          .bindHttp(appConfig.server.port, appConfig.server.host)
+          .bindHttp(appConfig.server.httpPort, appConfig.server.host)
           .withHttpApp(Router("/" -> CacheRoutes.routes).orNotFound)
           .serve
           .compile

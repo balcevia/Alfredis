@@ -22,12 +22,12 @@ case class WorkerRegistrationServiceImpl(
       case state if state.isLeader => ZIO.unit
       case state =>
         for {
-          _                 <- ZIO.logInfo("Registering new worker node...")
+          _                 <- ZIO.logTrace("Registering new worker node...")
           workersNodeExists <- service.exists(config.workersPath)
           _                 <- if (!workersNodeExists) service.create(config.workersPath, None, CreateMode.PERSISTENT) else ZIO.unit
           createdNode       <- service.create(s"${config.workersPath}/worker", Some(data), CreateMode.EPHEMERAL_SEQUENTIAL)
           _                 <- clusterState.update(state => state.copy(workerNode = Some(createdNode)))
-          _                 <- ZIO.logInfo(s"Created new worker node '${createdNode.path}'")
+          _                 <- ZIO.logTrace(s"Created new worker node '${createdNode.path}'")
         } yield ()
     }
   }

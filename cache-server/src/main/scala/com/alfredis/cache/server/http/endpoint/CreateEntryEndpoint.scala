@@ -33,11 +33,11 @@ object CreateEntryEndpoint extends TapirRoute with ErrorHandler {
       clusterState <- ZIO.service[Ref[ZookeeperClusterState]]
       state        <- clusterState.get
       isAuthorized = state.isLeader || request.from == state.currentLeader.map(_.path)
-      _ <- ZIO.logInfo("Creating new entries...")
+      _ <- ZIO.logTrace("Creating new entries...")
       _ <-
         if (isAuthorized) ZIO.serviceWithZIO[CacheService](_.put(request.entries, state.isLeader))
         else
-          ZIO.logInfo("Creating new entries failed, client is not authorizes to create new entries") *> ZIO.fail(
+          ZIO.logTrace("Creating new entries failed, client is not authorizes to create new entries") *> ZIO.fail(
             UnauthorizedCacheCreateEntryRequest,
           )
     } yield ()

@@ -1,16 +1,12 @@
 package com.alfredis.cache.server.http.service
 
-import com.alfredis.api.model.{CacheEntryRequest, CacheEntryResponse, CreateEntryRequest}
-import com.alfredis.cache.server.http.URLUtils
+import com.alfredis.api.model.CacheEntryRequest
 import com.alfredis.cache.{Cache, CacheRecord}
-import com.alfredis.httpclient.HttpClient
+import com.alfredis.tcp.ZIOTCPClient
 import com.alfredis.zookeepercore.config.ZookeeperClusterState
-import io.circe.Printer
-import io.circe.syntax.*
-import sttp.model.Header
 import zio.{Ref, UIO, ZIO, ZLayer}
 
-case class CacheServiceImpl(cache: Ref[Cache[String, Array[Byte]]], clusterState: Ref[ZookeeperClusterState], httpClient: HttpClient)
+case class CacheServiceImpl(cache: Ref[Cache[String, Array[Byte]]], clusterState: Ref[ZookeeperClusterState], tcpClient: ZIOTCPClient)
     extends CacheService {
   override def put(entries: Seq[CacheEntryRequest], isLeader: Boolean): UIO[Unit] = {
     for {
@@ -22,15 +18,15 @@ case class CacheServiceImpl(cache: Ref[Cache[String, Array[Byte]]], clusterState
   private def replicateToWorkers(entries: Seq[CacheEntryRequest]): UIO[Unit] = {
     val result = for {
       state <- clusterState.get
-      requestBody    = CreateEntryRequest(state.currentLeader.map(_.path), entries)
-      serialisedBody = requestBody.asJson.printWith(Printer.noSpaces)
-      requests       = state.workers.map(w => URLUtils.createEntryUrl(w.decodedData._2)).map(uri => httpClient.postRequest(uri, serialisedBody))
-      _ <- ZIO.collectAllPar(requests.map(httpClient.callApiUnit))
+      hostsAndPorts = state.workers.map(w => w.getHostAndPort)
+      _ <- ZIO.collectAllPar(hostsAndPorts.map { case (host, port) =>
+        tcpClient.put(host, port, entries.toList, state.currentLeader.map(_.path))
+      })
     } yield ()
 
     result.foldZIO(
-      error => ZIO.logError(s"Replication failed: ${error.message}") *> ZIO.unit,
-      _ => ZIO.logInfo(s"Replication succeeded") *> ZIO.unit,
+      error => ZIO.logError(s"Replication failed: ${error.getMessage}") *> ZIO.unit,
+      _ => ZIO.logTrace(s"Replication succeeded") *> ZIO.unit,
     )
   }
 
@@ -41,34 +37,31 @@ case class CacheServiceImpl(cache: Ref[Cache[String, Array[Byte]]], clusterState
   override def retrieveStateFromLeaderIfNeeded(): UIO[Unit] = {
     val result = clusterState.get.flatMap { state =>
       if (!state.isLeader && state.currentLeader.isDefined) {
-        val request = httpClient
-          .getRequest(URLUtils.retrieveLeadersStateUrl(state.currentLeader.get.decodedData._2))
-          .header(Header("From", state.workerNode.get.path))
-
+        val (host, port) = state.currentLeader.get.getHostAndPort
         for {
-          response <- httpClient.callApi[List[CacheEntryResponse]](request)
-          _        <- ZIO.logInfo(s"Received data from the leader: $response")
+          response <- tcpClient.getAll(host, port, state.workerNode.map(_.path))
+          _        <- ZIO.logTrace(s"Received data from the leader, data size: ${response.size}")
           _ <- cache.update { c =>
-            response.foreach(e => c.put(e.key, e.value)); c
+            response.foreach(e => c.put(e._1, e._2)); c
           }
         } yield ()
-      } else ZIO.logInfo("Current node is a leader, data sync is not needed") *> ZIO.unit
+      } else ZIO.logTrace("Current node is a leader, data sync is not needed") *> ZIO.unit
     }
 
     result.foldZIO(
-      error => ZIO.logError(error.message),
+      error => ZIO.logError(error.getMessage),
       v => ZIO.succeed(v),
     )
   }
 }
 
 object CacheServiceImpl {
-  val live: ZLayer[HttpClient & Ref[ZookeeperClusterState] & Ref[Cache[String, Array[Byte]]], Nothing, CacheServiceImpl] =
+  val live: ZLayer[ZIOTCPClient & Ref[ZookeeperClusterState] & Ref[Cache[String, Array[Byte]]], Nothing, CacheServiceImpl] =
     ZLayer.fromZIO {
       for {
         cache        <- ZIO.service[Ref[Cache[String, Array[Byte]]]]
         clusterState <- ZIO.service[Ref[ZookeeperClusterState]]
-        httpClient   <- ZIO.service[HttpClient]
-      } yield CacheServiceImpl(cache, clusterState, httpClient)
+        tcpClient    <- ZIO.service[ZIOTCPClient]
+      } yield CacheServiceImpl(cache, clusterState, tcpClient)
     }
 }

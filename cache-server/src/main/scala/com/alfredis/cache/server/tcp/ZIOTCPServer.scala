@@ -1,6 +1,7 @@
 package com.alfredis.cache.server.tcp
 
 import com.alfredis.api.model.CacheEntryResponse
+import com.alfredis.cache.server.config.AppConfig
 import com.alfredis.cache.server.http.service.CacheService
 import com.alfredis.error.UnauthorizedCacheCreateEntryRequest
 import com.alfredis.tcp.TCPRequestType.{GET, GET_ALL, PUT}
@@ -12,15 +13,11 @@ import zio.{Ref, URIO, ZIO, ZLayer}
 import java.io.{ObjectInputStream, ObjectOutputStream}
 import java.net.{ServerSocket, Socket}
 
-case class ZIOTCPServer(
-    port: Int,
-    cacheService: CacheService,
-    clusterState: Ref[ZookeeperClusterState],
-) {
+case class ZIOTCPServer(appConfig: AppConfig, cacheService: CacheService, clusterState: Ref[ZookeeperClusterState]) {
 
   def start(): ZIO[Any, Throwable, Unit] = for {
-    _            <- ZIO.logInfo(s"Starting TCP server on port $port")
-    serverSocket <- ZIO.attempt(new ServerSocket(port))
+    _            <- ZIO.logTrace(s"Starting TCP server on port ${appConfig.server.port}")
+    serverSocket <- ZIO.attempt(new ServerSocket(appConfig.server.port))
     _            <- accept(serverSocket)
   } yield ()
 
@@ -35,22 +32,40 @@ case class ZIOTCPServer(
     .forever
 
   private def handle(socket: Socket): ZIO[Any, Throwable, Unit] = for {
-    _                  <- ZIO.logInfo(s"Handling request...")
+    _                  <- ZIO.logTrace(s"Handling request...")
     objectOutputStream <- ZIO.attempt(new ObjectOutputStream(socket.getOutputStream))
     objectInputStream  <- ZIO.attempt(new ObjectInputStream(socket.getInputStream))
     requestEntity      <- ZIO.attempt(objectInputStream.readObject().asInstanceOf[TCPRequest])
-    response           <- processRequest(requestEntity)
-    _                  <- ZIO.attempt(objectOutputStream.writeObject(response))
-    _                  <- ZIO.attempt(objectInputStream.close())
-    _                  <- ZIO.attempt(objectOutputStream.close())
-    _                  <- ZIO.attempt(socket.close())
+    _                  <- process(requestEntity, objectOutputStream, objectInputStream, socket)
   } yield ()
 
-  private def processRequest(request: TCPRequest): ZIO[Any, Throwable, TCPResponse] = {
+  private def writeResponseAndHandleConnections(
+      response: TCPResponse,
+      objectOutputStream: ObjectOutputStream,
+      objectInputStream: ObjectInputStream,
+      socket: Socket,
+  ): ZIO[Any, Throwable, Unit] = for {
+    _ <- ZIO.attempt(objectOutputStream.writeObject(response))
+    _ <- ZIO.attempt(objectInputStream.close())
+    _ <- ZIO.attempt(objectOutputStream.close())
+    _ <- ZIO.attempt(socket.close())
+  } yield ()
+
+  private def process(
+      request: TCPRequest,
+      objectOutputStream: ObjectOutputStream,
+      objectInputStream: ObjectInputStream,
+      socket: Socket,
+  ) = {
     request.requestType match {
-      case PUT     => createEntryRequestHandler(request)
-      case GET     => getEntryRequestHandler(request)
-      case GET_ALL => getAllRequestHandler(request)
+      case PUT =>
+        writeResponseAndHandleConnections(TCPResponse(OK), objectOutputStream, objectInputStream, socket) *> createEntryRequestHandler(
+          request,
+        )
+      case GET =>
+        getEntryRequestHandler(request).flatMap(writeResponseAndHandleConnections(_, objectOutputStream, objectInputStream, socket))
+      case GET_ALL =>
+        getAllRequestHandler(request).flatMap(writeResponseAndHandleConnections(_, objectOutputStream, objectInputStream, socket))
     }
   }
 
@@ -58,11 +73,11 @@ case class ZIOTCPServer(
     val result = for {
       state <- clusterState.get
       isAuthorized = state.isLeader || request.resource == state.currentLeader.map(_.path)
-      _ <- ZIO.logInfo("Creating new entries...")
+      _ <- ZIO.logTrace("Creating new entries...")
       _ <-
         if (isAuthorized) cacheService.put(request.entity, state.isLeader)
         else
-          ZIO.logInfo("Creating new entries failed, client is not authorizes to create new entries") *> ZIO.fail(
+          ZIO.logTrace("Creating new entries failed, client is not authorizes to create new entries") *> ZIO.fail(
             UnauthorizedCacheCreateEntryRequest,
           )
     } yield ()
@@ -100,10 +115,11 @@ case class ZIOTCPServer(
 }
 
 object ZIOTCPServer {
-  def live(port: Int): ZLayer[Ref[ZookeeperClusterState] & CacheService, Nothing, ZIOTCPServer] = ZLayer.fromZIO {
+  val live: ZLayer[Ref[ZookeeperClusterState] & CacheService & AppConfig, Nothing, ZIOTCPServer] = ZLayer.fromZIO {
     for {
+      appConfig    <- ZIO.service[AppConfig]
       cacheService <- ZIO.service[CacheService]
       clusterState <- ZIO.service[Ref[ZookeeperClusterState]]
-    } yield ZIOTCPServer(port, cacheService, clusterState)
+    } yield ZIOTCPServer(appConfig, cacheService, clusterState)
   }
 }

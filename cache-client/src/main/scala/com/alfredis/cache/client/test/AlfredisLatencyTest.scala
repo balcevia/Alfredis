@@ -1,6 +1,7 @@
 package com.alfredis.cache.client.test
 
 import com.alfredis.cache.client.CacheClient
+import com.alfredis.tcp.ZIOTCPClient
 import com.alfredis.zookeepercore.config.ZookeeperConfig
 import zio.{Clock, ZIO, ZIOAppDefault}
 
@@ -17,7 +18,7 @@ object AlfredisLatencyTest extends ZIOAppDefault {
    * Think about test depending on data volume
    */
 
-  override def run = runTests(1000, 100, 33).provide(CacheClient.live, ZookeeperConfig.live)
+  override def run = runTests(1000, 100, 33).provide(CacheClient.live, ZookeeperConfig.live, ZIOTCPClient.live)
 
   private def runTests(numberOfRequests: Int, step: Int, stringLength: Int) = for {
     results <- latencyTest(numberOfRequests, step, stringLength)
@@ -26,29 +27,20 @@ object AlfredisLatencyTest extends ZIOAppDefault {
     results.foreach(println)
   }
 
-  def measurePut(data: Map[String, Array[Byte]]): ZIO[CacheClient, Nothing, Long] = {
+  def measurePut(data: Map[String, Array[Byte]]): ZIO[CacheClient, Throwable, Long] = {
     for {
-      result         <- sendPutRequests(data)
-    } yield result
+      client <- ZIO.service[CacheClient]
+      startTime <- Clock.currentTime(TimeUnit.MILLISECONDS)
+      _         <- sendPutRequests(client, data)
+      endTime   <- Clock.currentTime(TimeUnit.MILLISECONDS)
+    } yield endTime - startTime
   }
 
-  private def sendPutRequests(data: Map[String, Array[Byte]]): ZIO[CacheClient, Nothing, Long] = for {
-    client <- ZIO.service[CacheClient]
-    measures      <- ZIO.collectAllPar(data.map {
-      case (key, value) =>
-        for {
-          startTime <- Clock.currentTime(TimeUnit.MILLISECONDS)
-          _ <- client.put(key, value)
-          endTime   <- Clock.currentTime(TimeUnit.MILLISECONDS)
-        } yield endTime - startTime
-    })
-  } yield {
-    val length = measures.size
+  private def sendPutRequests(client: CacheClient, data: Map[String, Array[Byte]]): ZIO[CacheClient, Throwable, Unit] = for {
+    _ <- ZIO.collectAllPar(data.map { case (key, value) => client.put(key, value) })
+  } yield ()
 
-    measures.sum / length
-  }
-
-  def latencyTest(numberOfRequests: Int, step: Int, stringLength: Int): ZIO[CacheClient, Nothing, List[LatencyTestResult]] = {
+  def latencyTest(numberOfRequests: Int, step: Int, stringLength: Int): ZIO[CacheClient, Throwable, List[LatencyTestResult]] = {
     ZIO.collectAll(
       (0 to numberOfRequests by step).tail.toList.map { num =>
         val testData = Utils.createTestData(num, stringLength)

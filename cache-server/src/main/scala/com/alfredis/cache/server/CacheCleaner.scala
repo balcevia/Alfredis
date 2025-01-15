@@ -6,11 +6,11 @@ import zio.{Duration, Ref, Schedule, ZIO, ZLayer}
 
 case class CacheCleaner(cache: Ref[Cache[String, Array[Byte]]], appConfig: AppConfig) {
   def run(): ZIO[Any, Nothing, Long] =
-    (ZIO.logInfo("Running cleaning operation") *>
+    (ZIO.logTrace("Running cleaning operation") *>
       cache
         .getAndUpdate { c =>
           c.removeOutdatedEntries(); c
-        } *> ZIO.logInfo("Cache cleaned"))
+        } *> ZIO.logTrace("Cache cleaned"))
       .repeat(Schedule.fixed(Duration.fromSeconds(appConfig.cache.ttl)))
 }
 

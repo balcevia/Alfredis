@@ -26,9 +26,9 @@ case class WatcherEventProcessor(
   private def processEvent(event: WatcherEvent): ZIO[Any, DomainError, Unit] = {
     event.eventType match {
       case WatcherEventType.ElectionStateChange =>
-        ZIO.logInfo("Got ElectionStateChange event, processing...") *> processElectionStateChangeEvent()
+        ZIO.logTrace("Got ElectionStateChange event, processing...") *> processElectionStateChangeEvent()
       case WatcherEventType.WorkersChange =>
-        ZIO.logInfo("Got WorkersChange event, processing...") *> processWorkersChangeEvent()
+        ZIO.logTrace("Got WorkersChange event, processing...") *> processWorkersChangeEvent()
     }
   }
 
@@ -36,7 +36,7 @@ case class WatcherEventProcessor(
     zookeeperService
       .getChildrenWithData(zookeeperConfig.workersPath, Some(WatcherEventType.WorkersChange))
       .flatMap(workers => clusterState.update(state => state.copy(workers = workers.values.toList)))
-      .tap(_ => clusterState.get.flatMap(state => ZIO.logInfo(s"Updated cluster state: $state")))
+      .tap(_ => clusterState.get.flatMap(state => ZIO.logTrace(s"Updated cluster state: $state")))
 
   private def processElectionStateChangeEvent(): IO[DomainError, Unit] =
     leaderElectionService.electNewLeader()

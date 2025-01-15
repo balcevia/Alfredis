@@ -21,6 +21,7 @@ lazy val commonSettings = Seq(
     "-Yretain-trees",
     "-Ykind-projector:underscores",
   ),
+  dockerBaseImage := "openjdk:11.0.7",
 )
 
 lazy val domain = project

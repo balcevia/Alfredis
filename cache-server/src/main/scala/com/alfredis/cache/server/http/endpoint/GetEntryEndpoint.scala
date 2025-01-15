@@ -22,5 +22,5 @@ object GetEntryEndpoint extends TapirRoute with ErrorHandler {
   val serverEndpoint: ZServerEndpoint[Env, Any] = endpointDefinition.zServerLogic(request => handler(request))
 
   private def handler(key: String): ZIO[Env, CacheServerError, Option[Array[Byte]]] =
-    ZIO.logInfo(s"Retrieving data from cache by key: $key") *> ZIO.serviceWithZIO[CacheService](_.get(key)).tap(data => ZIO.logInfo(s"FoundData: $data"))
+    ZIO.logTrace(s"Retrieving data from cache by key: $key") *> ZIO.serviceWithZIO[CacheService](_.get(key)).tap(data => ZIO.logTrace(s"FoundData: $data"))
 }

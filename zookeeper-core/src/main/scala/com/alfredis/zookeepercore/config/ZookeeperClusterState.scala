@@ -28,6 +28,11 @@ case class ZookeeperNode(path: String, data: String, version: Int) {
     val splited = data.split("<>")
     splited(0) -> splited(1)
   }
+  
+  def getHostAndPort: (String, Int) = {
+    val hostAndPort = decodedData._2.split(":")
+    (hostAndPort.head, hostAndPort(1).toInt)
+  }
 }
 
 object ZookeeperNode {
