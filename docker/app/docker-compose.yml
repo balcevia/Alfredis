@@ -1,0 +1,251 @@
+services:
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:3.9
+    ports:
+      - '2181:2181'
+    volumes:
+      - 'zookeeper_data:/bitnami/zookeeper'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  server11:
+    image: "cache-server:0.1.0-SNAPSHOT"
+    ports:
+      - "8888:8888"
+      - "9000:9000"
+    environment:
+      - ZOOKEEPER_HOST=zookeeper
+      - TCP_SERVER_PORT=8888
+      - HTTP_SERVER_PORT=9000
+      - TCP_SERVER_HOST=0.0.0.0
+      - TCP_SERVER_INT=server11
+      - CACHE_TTL=10000
+      - GROUP_NAME=group1
+      - ZOOKEEPER_LEADERS_PATH=/leaders
+      - ZOOKEEPER_ELECTION_PATH=/election1
+      - ZOOKEEPER_WORKERS_PATH=/live_workers1
+    depends_on:
+      zookeeper:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:9000/health || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+  server12:
+    image: "cache-server:0.1.0-SNAPSHOT"
+    ports:
+      - "8889:8889"
+      - "9001:9001"
+    environment:
+      - ZOOKEEPER_HOST=zookeeper
+      - TCP_SERVER_PORT=8889
+      - HTTP_SERVER_PORT=9001
+      - TCP_SERVER_HOST=0.0.0.0
+      - TCP_SERVER_INT=server12
+      - CACHE_TTL=10000
+      - GROUP_NAME=group1
+      - ZOOKEEPER_LEADERS_PATH=/leaders
+      - ZOOKEEPER_ELECTION_PATH=/election1
+      - ZOOKEEPER_WORKERS_PATH=/live_workers1
+    depends_on:
+      zookeeper:
+        condition: service_started
+      server11:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:9001/health || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+  server13:
+    image: "cache-server:0.1.0-SNAPSHOT"
+    ports:
+      - "8890:8890"
+      - "9002:9002"
+    environment:
+      - ZOOKEEPER_HOST=zookeeper
+      - TCP_SERVER_PORT=8890
+      - HTTP_SERVER_PORT=9002
+      - TCP_SERVER_HOST=0.0.0.0
+      - TCP_SERVER_INT=server13
+      - CACHE_TTL=10000
+      - GROUP_NAME=group1
+      - ZOOKEEPER_LEADERS_PATH=/leaders
+      - ZOOKEEPER_ELECTION_PATH=/election1
+      - ZOOKEEPER_WORKERS_PATH=/live_workers1
+    depends_on:
+      zookeeper:
+        condition: service_started
+      server11:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:9002/health || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+  server21:
+    image: "cache-server:0.1.0-SNAPSHOT"
+    ports:
+      - "8891:8891"
+      - "9003:9003"
+    environment:
+      - ZOOKEEPER_HOST=zookeeper
+      - TCP_SERVER_PORT=8891
+      - HTTP_SERVER_PORT=9003
+      - TCP_SERVER_HOST=0.0.0.0
+      - TCP_SERVER_INT=server21
+      - CACHE_TTL=10000
+      - GROUP_NAME=group2
+      - ZOOKEEPER_LEADERS_PATH=/leaders
+      - ZOOKEEPER_ELECTION_PATH=/election2
+      - ZOOKEEPER_WORKERS_PATH=/live_workers2
+    depends_on:
+      zookeeper:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:9003/health || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+  server22:
+    image: "cache-server:0.1.0-SNAPSHOT"
+    ports:
+      - "8892:8892"
+      - "9004:9004"
+    environment:
+      - ZOOKEEPER_HOST=zookeeper
+      - TCP_SERVER_PORT=8892
+      - HTTP_SERVER_PORT=9004
+      - TCP_SERVER_HOST=0.0.0.0
+      - TCP_SERVER_INT=server22
+      - CACHE_TTL=10000
+      - GROUP_NAME=group2
+      - ZOOKEEPER_LEADERS_PATH=/leaders
+      - ZOOKEEPER_ELECTION_PATH=/election2
+      - ZOOKEEPER_WORKERS_PATH=/live_workers2
+    depends_on:
+      zookeeper:
+        condition: service_started
+      server21:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:9004/health || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+  server23:
+    image: "cache-server:0.1.0-SNAPSHOT"
+    ports:
+      - "8893:8893"
+      - "9005:9005"
+    environment:
+      - ZOOKEEPER_HOST=zookeeper
+      - TCP_SERVER_PORT=8893
+      - HTTP_SERVER_PORT=9005
+      - TCP_SERVER_HOST=0.0.0.0
+      - TCP_SERVER_INT=server23
+      - CACHE_TTL=10000
+      - GROUP_NAME=group2
+      - ZOOKEEPER_LEADERS_PATH=/leaders
+      - ZOOKEEPER_ELECTION_PATH=/election2
+      - ZOOKEEPER_WORKERS_PATH=/live_workers2
+    depends_on:
+      zookeeper:
+        condition: service_started
+      server21:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:9005/health || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  server31:
+    image: "cache-server:0.1.0-SNAPSHOT"
+    ports:
+      - "8894:8894"
+      - "9006:9006"
+    environment:
+      - ZOOKEEPER_HOST=zookeeper
+      - TCP_SERVER_PORT=8894
+      - HTTP_SERVER_PORT=9006
+      - TCP_SERVER_HOST=0.0.0.0
+      - TCP_SERVER_INT=server31
+      - CACHE_TTL=10000
+      - GROUP_NAME=group3
+      - ZOOKEEPER_LEADERS_PATH=/leaders
+      - ZOOKEEPER_ELECTION_PATH=/election3
+      - ZOOKEEPER_WORKERS_PATH=/live_workers3
+    depends_on:
+      zookeeper:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:9006/health || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+  server32:
+    image: "cache-server:0.1.0-SNAPSHOT"
+    ports:
+      - "8895:8895"
+      - "9007:9007"
+    environment:
+      - ZOOKEEPER_HOST=zookeeper
+      - TCP_SERVER_PORT=8895
+      - HTTP_SERVER_PORT=9007
+      - TCP_SERVER_HOST=0.0.0.0
+      - TCP_SERVER_INT=server32
+      - CACHE_TTL=10000
+      - GROUP_NAME=group3
+      - ZOOKEEPER_LEADERS_PATH=/leaders
+      - ZOOKEEPER_ELECTION_PATH=/election3
+      - ZOOKEEPER_WORKERS_PATH=/live_workers3
+    depends_on:
+      zookeeper:
+        condition: service_started
+      server31:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:9007/health || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+  server33:
+    image: "cache-server:0.1.0-SNAPSHOT"
+    ports:
+      - "8896:8896"
+      - "9008:9008"
+    environment:
+      - ZOOKEEPER_HOST=zookeeper
+      - TCP_SERVER_PORT=8896
+      - HTTP_SERVER_PORT=9008
+      - TCP_SERVER_HOST=0.0.0.0
+      - TCP_SERVER_INT=server33
+      - CACHE_TTL=10000
+      - GROUP_NAME=group3
+      - ZOOKEEPER_LEADERS_PATH=/leaders
+      - ZOOKEEPER_ELECTION_PATH=/election3
+      - ZOOKEEPER_WORKERS_PATH=/live_workers3
+    depends_on:
+      zookeeper:
+        condition: service_started
+      server31:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:9008/health || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+volumes:
+  zookeeper_data:
+    driver: local
