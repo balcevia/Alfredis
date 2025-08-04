@@ -1,6 +1,6 @@
 package com.alfredis.cache.client.test
 
-import com.alfredis.cache.client.CacheClient
+import com.alfredis.cache.client.AlfredisCacheClientImpl
 import com.alfredis.tcp.ZIOTCPClient
 import com.alfredis.zookeepercore.config.ZookeeperConfig
 import zio.{Clock, ZIO, ZIOAppDefault}
@@ -18,7 +18,7 @@ object AlfredisLatencyTest extends ZIOAppDefault {
    * Think about test depending on data volume
    */
 
-  override def run = runTests(1000, 100, 33).provide(CacheClient.live, ZookeeperConfig.live, ZIOTCPClient.live)
+  override def run = runTests(1000, 100, 33).provide(AlfredisCacheClientImpl.live, ZookeeperConfig.live, ZIOTCPClient.live)
 
   private def runTests(numberOfRequests: Int, step: Int, stringLength: Int) = for {
     results <- latencyTest(numberOfRequests, step, stringLength)
@@ -27,20 +27,20 @@ object AlfredisLatencyTest extends ZIOAppDefault {
     results.foreach(println)
   }
 
-  def measurePut(data: Map[String, Array[Byte]]): ZIO[CacheClient, Throwable, Long] = {
+  def measurePut(data: Map[String, Array[Byte]]): ZIO[AlfredisCacheClientImpl, Throwable, Long] = {
     for {
-      client <- ZIO.service[CacheClient]
+      client <- ZIO.service[AlfredisCacheClientImpl]
       startTime <- Clock.currentTime(TimeUnit.MILLISECONDS)
       _         <- sendPutRequests(client, data)
       endTime   <- Clock.currentTime(TimeUnit.MILLISECONDS)
     } yield endTime - startTime
   }
 
-  private def sendPutRequests(client: CacheClient, data: Map[String, Array[Byte]]): ZIO[CacheClient, Throwable, Unit] = for {
+  private def sendPutRequests(client: AlfredisCacheClientImpl, data: Map[String, Array[Byte]]): ZIO[AlfredisCacheClientImpl, Throwable, Unit] = for {
     _ <- ZIO.collectAllPar(data.map { case (key, value) => client.put(key, value) })
   } yield ()
 
-  def latencyTest(numberOfRequests: Int, step: Int, stringLength: Int): ZIO[CacheClient, Throwable, List[LatencyTestResult]] = {
+  def latencyTest(numberOfRequests: Int, step: Int, stringLength: Int): ZIO[AlfredisCacheClientImpl, Throwable, List[LatencyTestResult]] = {
     ZIO.collectAll(
       (0 to numberOfRequests by step).tail.toList.map { num =>
         val testData = Utils.createTestData(num, stringLength)

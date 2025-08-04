@@ -1,16 +1,13 @@
 package com.alfredis.console.client
 
 import cats.syntax.either.*
-import com.alfredis.cache.client.CacheClient
-import com.alfredis.tcp.ZIOTCPClient
-import com.alfredis.zookeepercore.config.ZookeeperConfig
 import zio.*
 import zio.Console.*
 import zio.stream.ZStream
 
 import java.io.IOException
 
-object ConsoleCacheClient extends ZIOAppDefault {
+case class ConsoleCacheClient(processor: CommandProcessor) {
   private val welcomeMessageAndInstruction: String =
     """
       |Welcome to Console Cache Client.
@@ -19,15 +16,10 @@ object ConsoleCacheClient extends ZIOAppDefault {
       |Use exit command to exit Console Cache Client.
       |""".stripMargin
 
-  override def run: ZIO[ZIOAppArgs & Scope, Any, Any] = {
-    val program = for {
-      _         <- Console.printLine(welcomeMessageAndInstruction)
-      processor <- ZIO.service[CommandProcessor]
-      _         <- commandStream(processor.process).runDrain
-    } yield ()
-
-    program.provide(CacheClient.live, ZookeeperConfig.live, ZIOTCPClient.live, CommandProcessor.live)
-  }
+  def run: ZIO[Any, IOException, Unit] = for {
+    _ <- Console.printLine(welcomeMessageAndInstruction)
+    _ <- commandStream(processor.process).runDrain
+  } yield ()
 
   private def mapCommand(cmd: String): Either[CommandError, Command] = {
     cmd match {
@@ -54,4 +46,8 @@ object ConsoleCacheClient extends ZIOAppDefault {
           }
         case Left(error) => Console.printLine(error.message)
       }
+}
+
+object ConsoleCacheClient {
+  val live: ZLayer[CommandProcessor, Nothing, ConsoleCacheClient] = ZLayer.fromFunction(ConsoleCacheClient(_))
 }

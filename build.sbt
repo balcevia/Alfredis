@@ -54,6 +54,15 @@ lazy val `console-cache-client` = project
   .dependsOn(domain)
   .dependsOn(`zookeeper-core`)
   .dependsOn(`cache-client`)
+
+lazy val `alfredis-console-cache-client` = project
+  .settings(commonSettings *)
+  .dependsOn(`console-cache-client`)
+  .enablePlugins(JavaAppPackaging)
+
+lazy val `redis-console-cache-client` = project
+  .settings(commonSettings *)
+  .dependsOn(`console-cache-client`)
   .enablePlugins(JavaAppPackaging)
 
 lazy val `app` = (project in file("."))

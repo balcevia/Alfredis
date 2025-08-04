@@ -1,4 +1,4 @@
-[warn] scala3-library_3-3.4.2-sources.jar no longer exists at \Users\mkapralov\Library\Caches\Coursier\v1\https\repo1.maven.org\maven2\org\scala-lang\scala3-library_3\3.4.2\scala3-library_3-3.4.2-sources.jar
+[warn] scala3-library_3-3.4.2-sources.jar no longer exists at /C:/Users/Alfred/AppData/Local/Coursier/Cache/v1/https/repo1.maven.org/maven2/org/scala-lang/scala3-library_3/3.4.2/scala3-library_3-3.4.2-sources.jar
 [debug] not up to date. inChanged = false, force = false
-[debug] Updating ProjectRef(uri("file:/C:/Users/Alfred/IdeaProjects/Alfredis/"), "app")...
-[debug] Done updating ProjectRef(uri("file:/C:/Users/Alfred/IdeaProjects/Alfredis/"), "app")
+[debug] Updating ProjectRef(uri("file:/Users/mkapralov/IdeaProjects/Alfredis/"), "app")...
+[debug] Done updating ProjectRef(uri("file:/Users/mkapralov/IdeaProjects/Alfredis/"), "app")

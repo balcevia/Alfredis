@@ -6,17 +6,38 @@ import com.alfredis.zookeepercore.ZKConnection
 import com.alfredis.zookeepercore.config.ZookeeperConfig
 import com.alfredis.zookeepercore.model.WatcherEvent
 import com.alfredis.zookeepercore.service.{ApacheZookeeperService, ApacheZookeeperServiceImpl}
-import zio.{Hub, Ref, Scope, ZIO, ZIOAppArgs, ZIOAppDefault, ZLayer}
+import redis.clients.jedis.JedisPool
+import zio.{Hub, Ref, Scope, ULayer, ZIO, ZIOAppArgs, ZIOAppDefault, ZLayer}
 
 import java.util.UUID
 
-case class CacheClient private (
+trait CacheClient {
+  def put(key: String, value: Array[Byte]): ZIO[Any, Throwable, Unit]
+  def get(key: String): ZIO[Any, Throwable, Option[Array[Byte]]]
+}
+
+case class RedisCacheClient() extends CacheClient {
+  private val pool  = new JedisPool("localhost", 6379)
+  private val jedis = pool.getResource
+
+  override def put(key: String, value: Array[Byte]): ZIO[Any, Throwable, Unit] =
+    ZIO.attempt(jedis.set("test", "First test")).unit
+
+  override def get(key: String): ZIO[Any, Throwable, Option[Array[Byte]]] =
+    ZIO.attempt(jedis.get("test")).map(v => Option(v).map(_.getBytes))
+}
+
+object RedisCacheClient {
+  val live: ULayer[RedisCacheClient] = ZLayer.succeed(RedisCacheClient())
+}
+
+case class AlfredisCacheClientImpl private (
     tcpClient: ZIOTCPClient,
     zookeeperService: ApacheZookeeperService,
     leaders: Ref[Map[String, String]],
     config: ZookeeperConfig,
     hashing: ConsistentHashing,
-) {
+) extends CacheClient {
 
   private def retrieveHostAndPort(nodeName: String): ZIO[Any, Nothing, (String, Int)] = {
     leaders.get.map(l => l(nodeName)).map { hostAndPort =>
@@ -25,7 +46,7 @@ case class CacheClient private (
     }
   }
 
-  def put(key: String, value: Array[Byte]): ZIO[Any, Throwable, Unit] = {
+  override def put(key: String, value: Array[Byte]): ZIO[Any, Throwable, Unit] = {
     val nodeName = hashing.getNode(key)
 
     retrieveHostAndPort(nodeName)
@@ -37,7 +58,7 @@ case class CacheClient private (
       .map(_ => ())
   }
 
-  def get(key: String): ZIO[Any, Throwable, Option[Array[Byte]]] = {
+  override def get(key: String): ZIO[Any, Throwable, Option[Array[Byte]]] = {
     val nodeName = hashing.getNode(key)
 
     retrieveHostAndPort(nodeName).flatMap { // fixme if throwable is thrown retry
@@ -54,8 +75,8 @@ case class CacheClient private (
 
 }
 
-object CacheClient {
-  def create(config: ZookeeperConfig, tcpClient: ZIOTCPClient): ZIO[Any, DomainError, CacheClient] = {
+object AlfredisCacheClientImpl {
+  def create(config: ZookeeperConfig, tcpClient: ZIOTCPClient): ZIO[Any, DomainError, AlfredisCacheClientImpl] = {
     for {
       hub        <- Hub.unbounded[WatcherEvent]()
       connection <- ZKConnection.connect(config.host, config.port)
@@ -63,10 +84,10 @@ object CacheClient {
       leaderNodes <- zookeeperService.getChildrenWithData(config.leadersPath, None)
       leaders = leaderNodes.values.map(_.decodedData).toMap
       leadersRef <- Ref.make(leaders)
-    } yield CacheClient(tcpClient, zookeeperService, leadersRef, config, ConsistentHashing(leaders.keys.toList))
+    } yield AlfredisCacheClientImpl(tcpClient, zookeeperService, leadersRef, config, ConsistentHashing(leaders.keys.toList))
   }
 
-  val live: ZLayer[ZookeeperConfig & ZIOTCPClient, DomainError, CacheClient] = ZLayer.fromZIO {
+  val live: ZLayer[ZookeeperConfig & ZIOTCPClient, DomainError, AlfredisCacheClientImpl] = ZLayer.fromZIO {
     for {
       config    <- ZIO.service[ZookeeperConfig]
       tcpClient <- ZIO.service[ZIOTCPClient]
@@ -74,7 +95,6 @@ object CacheClient {
     } yield client
   }
 }
-
 
 object ExampleApp extends ZIOAppDefault {
   override def run: ZIO[Any & ZIOAppArgs & Scope, Any, Any] = {
@@ -90,10 +110,10 @@ object ExampleApp extends ZIOAppDefault {
 //    program.provide(CacheClient.live, ZookeeperConfig.live, ZIOTCPClient.live)
 
     val test = for {
-      client <- ZIO.service[CacheClient]
-      _ <- ZIO.collectAll((1 to 100).map(_ => client.put(UUID.randomUUID().toString, UUID.randomUUID().toString.getBytes())))
+      client <- ZIO.service[AlfredisCacheClientImpl]
+      _      <- ZIO.collectAll((1 to 100).map(_ => client.put(UUID.randomUUID().toString, UUID.randomUUID().toString.getBytes())))
     } yield ()
 
-    test.provide(CacheClient.live, ZookeeperConfig.live, ZIOTCPClient.live)
+    test.provide(AlfredisCacheClientImpl.live, ZookeeperConfig.live, ZIOTCPClient.live)
   }
 }
