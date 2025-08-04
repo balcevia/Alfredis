@@ -8,6 +8,8 @@ import com.alfredis.zookeepercore.model.WatcherEvent
 import com.alfredis.zookeepercore.service.{ApacheZookeeperService, ApacheZookeeperServiceImpl}
 import zio.{Hub, Ref, Scope, ZIO, ZIOAppArgs, ZIOAppDefault, ZLayer}
 
+import java.util.UUID
+
 case class CacheClient private (
     tcpClient: ZIOTCPClient,
     zookeeperService: ApacheZookeeperService,
@@ -28,7 +30,9 @@ case class CacheClient private (
 
     retrieveHostAndPort(nodeName)
       .flatMap { // fixme if throwable is thrown retry
-        case (host, port) => tcpClient.put(host, port, key, value)
+        case (host, port) =>
+          println(s"$host: $port") // todo remove
+          tcpClient.put(host, port, key, value)
       }
       .map(_ => ())
   }
@@ -72,15 +76,24 @@ object CacheClient {
 }
 
 
-object XXX extends ZIOAppDefault {
+object ExampleApp extends ZIOAppDefault {
   override def run: ZIO[Any & ZIOAppArgs & Scope, Any, Any] = {
-    val program = for {
+//    val program = for {
+//      client <- ZIO.service[CacheClient]
+//      _ <- client.put("test1", "ALAMAKOTA".getBytes)
+//      _ <- client.put(UUID.randomUUID().toString, "ascasmxaksnxaj".getBytes)
+//      _ <- client.put(UUID.randomUUID().toString, "admaskd".getBytes)
+//      str <- client.get("test1").map(_.map(bytes => new String(bytes)))
+//      _ = println(str)
+//    } yield ()
+
+//    program.provide(CacheClient.live, ZookeeperConfig.live, ZIOTCPClient.live)
+
+    val test = for {
       client <- ZIO.service[CacheClient]
-      _ <- client.put("test1", "ALAMAKOTA".getBytes)
-      str <- client.get("test1").map(_.map(bytes => new String(bytes)))
-      _ = println(str)
+      _ <- ZIO.collectAll((1 to 100).map(_ => client.put(UUID.randomUUID().toString, UUID.randomUUID().toString.getBytes())))
     } yield ()
 
-    program.provide(CacheClient.live, ZookeeperConfig.live, ZIOTCPClient.live)
+    test.provide(CacheClient.live, ZookeeperConfig.live, ZIOTCPClient.live)
   }
 }

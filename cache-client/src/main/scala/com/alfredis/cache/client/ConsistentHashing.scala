@@ -9,7 +9,11 @@ case class ConsistentHashing(nodes: List[String], replicas: Int = 3, hashingAlgo
   private var hashRing: TreeMap[Long, String] = {
     val keyValues = nodes.flatMap(node => (1 to replicas).map(createRingEntry(node, _)).toList)
 
-    TreeMap.from(keyValues)
+    val result = TreeMap.from(keyValues)
+
+    result.toList.sortBy(_._1).foreach(println) // todo remove
+
+    result
   }
 
   private def createRingEntry(node: String, index: Int): (Long, String) = generateHash(s"$node-$index") -> node

@@ -8,7 +8,7 @@
 
     <logger name="io.confluent.kafka.schemaregistry" level="${LOG_LEVEL:-INFO}"/>
 
-    <root level="${LOG_LEVEL:-INFO}">
+    <root level="${LOG_LEVEL:-TRACE}">
         <appender-ref ref="CONSOLE"/>
     </root>
 

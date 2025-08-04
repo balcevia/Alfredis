@@ -9,9 +9,9 @@ import java.util.concurrent.TimeUnit
 
 object AlfredisLatencyTest extends ZIOAppDefault {
   /*
-   * We need to divide tests into groups depending on configuration:
+   * I need to divide tests into groups depending on configuration:
    * initial assumption is to make tests depending on number of replicas and number of lieder nodes
-   * For latency measurements we need a chart of response time vs number of requests, we measure for example 50 requests response time, it's a first point, then 100 req, 150 and so on.
+   * For latency measurements I need a chart of response time vs number of requests, I measure for example 50 requests response time, it's a first point, then 100 req, 150 and so on.
 
    * Make two separate charts for put and get
 

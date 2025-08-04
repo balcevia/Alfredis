@@ -73,7 +73,7 @@ case class ZIOTCPServer(appConfig: AppConfig, cacheService: CacheService, cluste
     val result = for {
       state <- clusterState.get
       isAuthorized = state.isLeader || request.resource == state.currentLeader.map(_.path)
-      _ <- ZIO.logTrace("Creating new entries...")
+      _ <- ZIO.logTrace(s"Creating new entries with key: ${request.entity.map(_.key)}")
       _ <-
         if (isAuthorized) cacheService.put(request.entity, state.isLeader)
         else
