@@ -54,7 +54,7 @@ object Dependencies {
 
     val sttpClient           = "com.softwaremill.sttp.tapir"   %% "tapir-sttp-client"             % Versions.tapir
     val zioSttpClientBackend = "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % Versions.zioSttpClientBackend
-    val redisClients = "redis.clients" % "jedis" % Versions.redis
+    val redisClients         = "redis.clients"                  % "jedis"                         % Versions.redis
   }
 
   object Versions {
@@ -70,6 +70,6 @@ object Dependencies {
     val zioSlf4j2            = "2.3.0"
     val logbackClassic       = "1.5.6"
     val logbackEncoder       = "8.0"
-    val redis = "5.1.3"
+    val redis                = "5.1.3"
   }
 }
