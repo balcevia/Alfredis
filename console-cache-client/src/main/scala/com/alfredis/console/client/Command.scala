@@ -10,6 +10,6 @@ case object ExitCommand extends Command
 
 object Command {
   val EXIT_COMMAND_REGEX: Regex = "exit".r
-  val PUT_COMMAND_REGEX: Regex = """put\s+(\w+)->(\w+)""".r
+  val PUT_COMMAND_REGEX: Regex = """put\s+(\w+)->(.+)""".r
   val GET_COMMAND_REGEX: Regex = """get\s+(\w+)""".r
 }

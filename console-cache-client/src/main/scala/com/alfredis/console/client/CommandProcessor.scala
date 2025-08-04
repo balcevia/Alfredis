@@ -1,7 +1,9 @@
 package com.alfredis.console.client
 
 import com.alfredis.cache.client.CacheClient
-import zio.{Console, URIO, ZIO, ZLayer}
+import zio.{Clock, Console, URIO, ZIO, ZLayer}
+
+import java.util.concurrent.TimeUnit
 
 trait CommandProcessor {
   def process(cmd: Command): URIO[Any, Either[Throwable, Unit]]
@@ -9,10 +11,10 @@ trait CommandProcessor {
 
 case class CommandProcessorImpl(client: CacheClient) extends CommandProcessor {
   override def process(cmd: Command): URIO[Any, Either[Throwable, Unit]] = cmd match {
-    case PutCommand(key, value) => client.put(key, value.getBytes).either
+    case PutCommand(key, value) =>
+      measure(cmd, client.put(key, value.getBytes)).either
     case GetCommand(key) =>
-      client
-        .get(key)
+      measure(cmd, client.get(key))
         .flatMap {
           case Some(bytes) =>
             val str = new String(bytes)
@@ -21,6 +23,15 @@ case class CommandProcessorImpl(client: CacheClient) extends CommandProcessor {
         }
         .either
     case _ => ZIO.succeed(Right(()))
+  }
+  
+  private def measure[T](cmd: Command, operation: ZIO[Any, Throwable, T]): ZIO[Any, Throwable, T] = {
+    for {
+      startTime <- Clock.currentTime(TimeUnit.MILLISECONDS)
+      result <- operation
+      endTime <- Clock.currentTime(TimeUnit.MILLISECONDS)
+      _ <- Console.printLine(s"$cmd took ${endTime - startTime} milliseconds to execute.")
+    } yield result
   }
 }
 
